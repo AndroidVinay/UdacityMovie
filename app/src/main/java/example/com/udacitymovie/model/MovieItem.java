@@ -31,6 +31,16 @@ public class MovieItem implements Parcelable {
     public MovieItem() {
 
     }
+    public MovieItem(String id,String poster_path,String title, String original_title, String overview,String vote_average,String release_date) {
+
+        this.id = id;
+        this.poster_path= poster_path;
+        this.title = title;
+        this.overview = overview;
+        this.vote_average = vote_average;
+        this.release_date = release_date;
+
+    }
 
 
     public String getPage() {
@@ -170,6 +180,24 @@ public class MovieItem implements Parcelable {
     }
 
     public MovieItem(Parcel in) {
+        page = in.readString();
+        total_results = in.readString();
+        total_pages = in.readString();
+        poster_path = in.readString();
+        adult = in.readString();
+        overview = in.readString();
+        release_date = in.readString();
+        genre_ids = in.readString();
+        id = in.readString();
+        original_title = in.readString();
+        original_language = in.readString();
+        backdrop_path = in.readString();
+        title = in.readString();
+        popularity = in.readString();
+        vote_count = in.readString();
+        video = in.readString();
+        vote_average = in.readString();
+
     }
 
     public static final Creator<MovieItem> CREATOR = new Creator<MovieItem>() {
@@ -191,5 +219,22 @@ public class MovieItem implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+
+        dest.writeString(page);
+        dest.writeString(total_results);
+        dest.writeString(total_pages);
+        dest.writeString(adult);
+        dest.writeString(overview);
+        dest.writeString(release_date);
+        dest.writeString(genre_ids);
+        dest.writeString(id);
+        dest.writeString(original_title);
+        dest.writeString(original_language);
+        dest.writeString(backdrop_path);
+        dest.writeString(title);
+        dest.writeString(popularity);
+        dest.writeString(vote_count);
+        dest.writeString(video);
+        dest.writeString(vote_average);
     }
 }

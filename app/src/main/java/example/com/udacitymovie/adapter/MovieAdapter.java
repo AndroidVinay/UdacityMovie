@@ -38,25 +38,19 @@ import example.com.udacitymovie.model.MovieItem;
 /**
  * Created by vppl-10132 on 1/4/2016.
  */
-public class MovieAdapter extends ArrayAdapter {
+public class MovieAdapter extends ArrayAdapter<MovieItem> {
 
     private Context mContext;
-    private ArrayList<String> posterLinkUrl = new ArrayList<>();
-    View rootView;
-    Fragment fragment;
-    private static int mImageWidth;
-    private static int mImageHeight;
+    private ArrayList<MovieItem> posterLinkUrl = new ArrayList<>();
+
+
     LayoutInflater inflater;
 
-    public MovieAdapter(Context context, int resource, ArrayList<String> objects, Fragment fragment) {
+    public MovieAdapter(Context context, int resource, ArrayList<MovieItem> objects) {
         super(context, resource);
         mContext = context;
         posterLinkUrl = objects;
-        this.fragment = fragment;
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        fragment.getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        mImageWidth = displayMetrics.widthPixels / 2;
-        mImageHeight = mImageWidth * 4 / 3;
+
 
         inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
@@ -72,34 +66,18 @@ public class MovieAdapter extends ArrayAdapter {
         View rootView = inflater.inflate(R.layout.movie_grid_item, null);
         ImageView imageView;
 
+        String url = "http://image.tmdb.org/t/p/w185";
         imageView = (ImageView) rootView.findViewById(R.id.iv_movie);
 
         if (posterLinkUrl != null) {
-            Glide.with(fragment)
-                    .load("http://image.tmdb.org/t/p/w154/5MUyULSD4syaMQFcfPABqopAO4e.jpg")
-                    .override(mImageWidth, mImageHeight)
+            Glide.with(mContext)
+                    .load(url+posterLinkUrl.get(position).getPoster_path())
+                    .centerCrop()
                     .into(imageView);
         } else {
             Toast.makeText(mContext, "", Toast.LENGTH_SHORT).show();
         }
-
         return rootView;
-//        final ImageView myImageView;
-//        if (convertView == null) {
-//            myImageView = (ImageView) inflater.inflate(R.layout.movie_grid_item, parent, false);
-//        } else {
-//            myImageView = (ImageView) convertView;
-//        }
-//
-////       ? String url = myUrls.get(position);
-//
-//        Glide.with(mContext)
-//                .load("http://image.tmdb.org/t/p/w154/5MUyULSD4syaMQFcfPABqopAO4e.jpg")
-//                .centerCrop()
-//                .crossFade()
-//                .into(myImageView);
-//
-//        return myImageView;
 
     }
 
