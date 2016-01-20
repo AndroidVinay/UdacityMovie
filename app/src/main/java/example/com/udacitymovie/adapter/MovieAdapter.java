@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.zip.Inflater;
 
 import example.com.udacitymovie.BuildConfig;
+import example.com.udacitymovie.MainActivity;
 import example.com.udacitymovie.MainFragment;
 import example.com.udacitymovie.R;
 import example.com.udacitymovie.model.MovieItem;
@@ -38,11 +39,11 @@ import example.com.udacitymovie.model.MovieItem;
 /**
  * Created by vppl-10132 on 1/4/2016.
  */
+
 public class MovieAdapter extends ArrayAdapter<MovieItem> {
 
     private Context mContext;
     private ArrayList<MovieItem> posterLinkUrl = new ArrayList<>();
-
 
     LayoutInflater inflater;
 
@@ -50,8 +51,6 @@ public class MovieAdapter extends ArrayAdapter<MovieItem> {
         super(context, resource);
         mContext = context;
         posterLinkUrl = objects;
-
-
         inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -62,22 +61,24 @@ public class MovieAdapter extends ArrayAdapter<MovieItem> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-//
-        View rootView = inflater.inflate(R.layout.movie_grid_item, null);
+
+        MovieItem movieItem = posterLinkUrl.get(position);
         ImageView imageView;
+        String url = "http://image.tmdb.org/t/p/w154";
 
-        String url = "http://image.tmdb.org/t/p/w185";
-        imageView = (ImageView) rootView.findViewById(R.id.iv_movie);
-
-        if (posterLinkUrl != null) {
-            Glide.with(mContext)
-                    .load(url+posterLinkUrl.get(position).getPoster_path())
-                    .centerCrop()
-                    .into(imageView);
-        } else {
-            Toast.makeText(mContext, "", Toast.LENGTH_SHORT).show();
+        if (null == convertView) {
+            convertView = inflater.inflate(R.layout.movie_grid_item, null);
         }
-        return rootView;
+//
+        imageView = (ImageView) convertView.findViewById(R.id.iv_movie);
+
+
+        Glide.with(mContext)
+                .load(url + movieItem.getPoster_path())
+                .crossFade()
+                .into(imageView);
+
+        return convertView;
 
     }
 

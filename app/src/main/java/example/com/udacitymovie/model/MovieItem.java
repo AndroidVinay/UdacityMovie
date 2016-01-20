@@ -6,8 +6,8 @@ import android.os.Parcelable;
 /**
  * Created by vppl-10132 on 1/5/2016.
  */
-public class MovieItem implements Parcelable {
 
+public class MovieItem implements Parcelable {
 
     private String page = "page";
     private String total_results = "total_results";
@@ -27,7 +27,6 @@ public class MovieItem implements Parcelable {
     private String video = "video";
     private String vote_average = "vote_average";
 
-
     public MovieItem() {
 
     }
@@ -37,9 +36,9 @@ public class MovieItem implements Parcelable {
         this.poster_path= poster_path;
         this.title = title;
         this.overview = overview;
+        this.original_title = original_title;
         this.vote_average = vote_average;
         this.release_date = release_date;
-
     }
 
 

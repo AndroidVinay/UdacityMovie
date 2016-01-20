@@ -1,7 +1,9 @@
 package example.com.udacitymovie;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -10,8 +12,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,11 +37,12 @@ import example.com.udacitymovie.model.MovieItem;
  */
 public class MainFragment extends Fragment {
 
+    private String TAG = MainFragment.class.getSimpleName();
+
     public static final String API_KEY_VALUE = "e1dc62d7886d8f0e3741112dbef87484";
 
     private MovieAdapter mMovieListAdapter;
-    public static int mImageWidth;
-    public static int mImageHeight;
+
     private GridView gridView;
     ArrayList<MovieItem> posterLinkUrl = new ArrayList<MovieItem>();
 
@@ -49,36 +54,51 @@ public class MainFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         new FetchMovieList().execute("");
-        setHasOptionsMenu(true);
 
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        mImageWidth = displayMetrics.widthPixels / 2;
-        mImageHeight = mImageWidth * 4 / 3;
+        if (savedInstanceState == null || !savedInstanceState.containsKey("movieList")) {
+            new FetchMovieList().execute("");
+        } else {
+            posterLinkUrl = savedInstanceState.getParcelableArrayList("movieList");
+        }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gv_movie);
-        mMovieListAdapter = new MovieAdapter(getActivity(), R.layout.movie_grid_item, posterLinkUrl);
-        gridView.setAdapter(mMovieListAdapter);
+
 
         return rootView;
-
     }
-
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onResume() {
+        super.onResume();
 
-        inflater.inflate(R.menu.fragment_main, menu);
+        mMovieListAdapter = new MovieAdapter(getActivity(), R.layout.movie_grid_item, posterLinkUrl);
+        gridView.setAdapter(mMovieListAdapter);
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                MovieItem movieItem = posterLinkUrl.get(position);
+                intent.putExtra("movieDetails", movieItem);
+                startActivity(intent);
+            }
+        });
 
 
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList("movieList", posterLinkUrl);
+        super.onSaveInstanceState(outState);
+    }
 
     private class FetchMovieList extends AsyncTask<String, String, String> {
         @Override
@@ -94,18 +114,17 @@ public class MainFragment extends Fragment {
 
             String jsonString = null;
 
+
             try {
 
                 String baseUrl = "http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&page=1";
                 String apiKey = "&api_key=" + MainFragment.API_KEY_VALUE;
                 URL url = new URL(baseUrl.concat(apiKey));
 
-
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
 
-                // Read the input stream into a String
                 InputStream inputStream = urlConnection.getInputStream();
                 StringBuffer buffer = new StringBuffer();
                 if (inputStream == null) {
@@ -117,21 +136,15 @@ public class MainFragment extends Fragment {
 
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                    // But it does make debugging a *lot* easier if you print out the completed
-                    // buffer for debugging.
                     buffer.append(line + "\n");
                 }
 
                 if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
                     return null;
                 }
                 jsonString = buffer.toString();
             } catch (IOException e) {
-                Log.e("PlaceholderFragment", "Error ", e);
-                // If the code didn't successfully get the weather data, there's no point in attemping
-                // to parse it.
+                Log.e(TAG, "Error ", e);
                 return null;
             } finally {
                 if (urlConnection != null) {
@@ -141,7 +154,7 @@ public class MainFragment extends Fragment {
                     try {
                         reader.close();
                     } catch (final IOException e) {
-                        Log.e("PlaceholderFragment", "Error closing stream", e);
+                        Log.e(TAG, "Error closing stream", e);
                     }
                 }
             }
@@ -167,7 +180,6 @@ public class MainFragment extends Fragment {
                     posterLinkUrl.add(movieItem);
 
                 }
-
 
             } catch (JSONException e) {
                 e.printStackTrace();
