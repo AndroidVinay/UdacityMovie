@@ -46,6 +46,7 @@ public class DetailFragment extends Fragment {
         TextView tv_og_title = (TextView) rootView.findViewById(R.id.tv_og_title);
         TextView tv_overview = (TextView) rootView.findViewById(R.id.tv_overview);
         TextView tv_vote_average = (TextView) rootView.findViewById(R.id.tv_vote_average);
+        TextView tv_release_date = (TextView) rootView.findViewById(R.id.tv_release_date);
         Button btn_make_fav = (Button) rootView.findViewById(R.id.btn_make_fav);
         ImageView iv_poster_image = (ImageView) rootView.findViewById(R.id.iv_poster_image);
         ListView lv_trailer = (ListView) rootView.findViewById(R.id.lv_trailor);
@@ -56,11 +57,11 @@ public class DetailFragment extends Fragment {
         tv_og_title.setText(movieItem.getOriginal_title().toString());
         tv_overview.setText(movieItem.getOverview());
         tv_vote_average.setText(movieItem.getVote_average().toString());
+        tv_release_date.setText(movieItem.getRelease_date().toString());
         Glide.with(getContext())
                 .load(url + movieItem.getPoster_path())
                 .crossFade()
                 .into(iv_poster_image);
-
 
 
         return rootView;

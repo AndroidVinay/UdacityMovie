@@ -3,17 +3,12 @@ package example.com.udacitymovie;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v4.app.Fragment;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.Toast;
 
@@ -38,11 +33,8 @@ import example.com.udacitymovie.model.MovieItem;
 public class MainFragment extends Fragment {
 
     private String TAG = MainFragment.class.getSimpleName();
-
     public static final String API_KEY_VALUE = "e1dc62d7886d8f0e3741112dbef87484";
-
     private MovieAdapter mMovieListAdapter;
-
     private GridView gridView;
     ArrayList<MovieItem> posterLinkUrl = new ArrayList<MovieItem>();
 
@@ -53,7 +45,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        new FetchMovieList().execute("");
+        Log.d(TAG, "on Create" + posterLinkUrl.size() + "");
 
         if (savedInstanceState == null || !savedInstanceState.containsKey("movieList")) {
             new FetchMovieList().execute("");
@@ -66,33 +58,27 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView");
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gv_movie);
-
-
-        return rootView;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
         mMovieListAdapter = new MovieAdapter(getActivity(), R.layout.movie_grid_item, posterLinkUrl);
+        Log.d(TAG, "on Resume" + posterLinkUrl.size() + "");
         gridView.setAdapter(mMovieListAdapter);
+        mMovieListAdapter.notifyDataSetChanged();
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                Intent intent = new Intent(getContext(), DetailActivity.class);
                 MovieItem movieItem = posterLinkUrl.get(position);
                 intent.putExtra("movieDetails", movieItem);
                 startActivity(intent);
             }
         });
 
-
+        return rootView;
     }
+
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -101,22 +87,22 @@ public class MainFragment extends Fragment {
     }
 
     private class FetchMovieList extends AsyncTask<String, String, String> {
+
+        private String TAG = FetchMovieList.class.getSimpleName();
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            posterLinkUrl.clear();
+            Log.d(TAG, "onPreExecute" + posterLinkUrl.size() + "");
         }
 
         @Override
         protected String doInBackground(String... params) {
             HttpURLConnection urlConnection = null;
-
             BufferedReader reader = null;
-
             String jsonString = null;
-
-
             try {
-
                 String baseUrl = "http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&page=1";
                 String apiKey = "&api_key=" + MainFragment.API_KEY_VALUE;
                 URL url = new URL(baseUrl.concat(apiKey));
@@ -128,7 +114,6 @@ public class MainFragment extends Fragment {
                 InputStream inputStream = urlConnection.getInputStream();
                 StringBuffer buffer = new StringBuffer();
                 if (inputStream == null) {
-                    // Nothing to do.
                     return null;
                 }
 
@@ -161,13 +146,9 @@ public class MainFragment extends Fragment {
 
 
             try {
-
                 JSONObject jsonObject = new JSONObject(jsonString);
-
                 JSONArray jsonArray = jsonObject.getJSONArray("results");
-
                 for (int i = 0; i < jsonArray.length(); i++) {
-
                     JSONObject jobj = jsonArray.getJSONObject(i);
                     MovieItem movieItem = new MovieItem(jobj.getString("id"),
                             jobj.getString("poster_path"),
@@ -176,11 +157,9 @@ public class MainFragment extends Fragment {
                             jobj.getString("overview"),
                             jobj.getString("vote_average"),
                             jobj.getString("release_date"));
-
                     posterLinkUrl.add(movieItem);
-
                 }
-
+                Log.d(TAG, "on Background" + posterLinkUrl.size() + "");
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -189,10 +168,13 @@ public class MainFragment extends Fragment {
 
         @Override
         protected void onPostExecute(String s) {
-//            super.onPostExecute(s);
-            mMovieListAdapter = new MovieAdapter(getActivity(), R.layout.movie_grid_item, posterLinkUrl);
-            gridView.setAdapter(mMovieListAdapter);
-
+            if (posterLinkUrl.size() > 0) {
+                mMovieListAdapter.addAll(posterLinkUrl);
+                mMovieListAdapter.notifyDataSetChanged();
+                Log.d(TAG, "on PostExecute" + posterLinkUrl.size() + "");
+            } else {
+                Toast.makeText(getContext(), "posterLinkUrl is empty", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

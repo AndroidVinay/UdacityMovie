@@ -16,7 +16,6 @@ public class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-
         MovieItem movieItem = getIntent().getExtras().getParcelable("movieDetails");
 
         Fragment fragment = DetailFragment.newInstance(movieItem);

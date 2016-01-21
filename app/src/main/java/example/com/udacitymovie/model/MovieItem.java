@@ -30,41 +30,24 @@ public class MovieItem implements Parcelable {
     public MovieItem() {
 
     }
-    public MovieItem(String id,String poster_path,String title, String original_title, String overview,String vote_average,String release_date) {
+    public MovieItem(String id,
+                     String poster_path,
+                     String title,
+                     String original_title,
+                     String overview,
+                     String vote_average,
+                     String release_date) {
 
         this.id = id;
         this.poster_path= poster_path;
         this.title = title;
-        this.overview = overview;
         this.original_title = original_title;
+        this.overview = overview;
         this.vote_average = vote_average;
         this.release_date = release_date;
     }
 
 
-    public String getPage() {
-        return page;
-    }
-
-    public void setPage(String page) {
-        this.page = page;
-    }
-
-    public String getTotal_results() {
-        return total_results;
-    }
-
-    public void setTotal_results(String total_results) {
-        this.total_results = total_results;
-    }
-
-    public String getTotal_pages() {
-        return total_pages;
-    }
-
-    public void setTotal_pages(String total_pages) {
-        this.total_pages = total_pages;
-    }
 
     public String getPoster_path() {
         return poster_path;
@@ -72,14 +55,6 @@ public class MovieItem implements Parcelable {
 
     public void setPoster_path(String poster_path) {
         this.poster_path = poster_path;
-    }
-
-    public String getAdult() {
-        return adult;
-    }
-
-    public void setAdult(String adult) {
-        this.adult = adult;
     }
 
     public String getOverview() {
@@ -98,14 +73,6 @@ public class MovieItem implements Parcelable {
         this.release_date = release_date;
     }
 
-    public String getGenre_ids() {
-        return genre_ids;
-    }
-
-    public void setGenre_ids(String genre_ids) {
-        this.genre_ids = genre_ids;
-    }
-
     public String getId() {
         return id;
     }
@@ -122,14 +89,6 @@ public class MovieItem implements Parcelable {
         this.original_title = original_title;
     }
 
-    public String getOriginal_language() {
-        return original_language;
-    }
-
-    public void setOriginal_language(String original_language) {
-        this.original_language = original_language;
-    }
-
     public String getTitle() {
         return title;
     }
@@ -138,21 +97,6 @@ public class MovieItem implements Parcelable {
         this.title = title;
     }
 
-    public String getBackdrop_path() {
-        return backdrop_path;
-    }
-
-    public void setBackdrop_path(String backdrop_path) {
-        this.backdrop_path = backdrop_path;
-    }
-
-    public String getPopularity() {
-        return popularity;
-    }
-
-    public void setPopularity(String popularity) {
-        this.popularity = popularity;
-    }
 
     public String getVote_count() {
         return vote_count;
@@ -162,13 +106,6 @@ public class MovieItem implements Parcelable {
         this.vote_count = vote_count;
     }
 
-    public String getVideo() {
-        return video;
-    }
-
-    public void setVideo(String video) {
-        this.video = video;
-    }
 
     public String getVote_average() {
         return vote_average;
@@ -199,7 +136,7 @@ public class MovieItem implements Parcelable {
 
     }
 
-    public static final Creator<MovieItem> CREATOR = new Creator<MovieItem>() {
+    public static final Parcelable.Creator<MovieItem> CREATOR = new Parcelable.Creator<MovieItem>() {
         @Override
         public MovieItem createFromParcel(Parcel in) {
             return new MovieItem(in);
@@ -222,6 +159,7 @@ public class MovieItem implements Parcelable {
         dest.writeString(page);
         dest.writeString(total_results);
         dest.writeString(total_pages);
+        dest.writeString(poster_path);
         dest.writeString(adult);
         dest.writeString(overview);
         dest.writeString(release_date);
