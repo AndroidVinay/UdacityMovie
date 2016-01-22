@@ -1,38 +1,16 @@
 package example.com.udacitymovie.adapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
-import android.support.v4.app.Fragment;
-import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.zip.Inflater;
 
-import example.com.udacitymovie.BuildConfig;
-import example.com.udacitymovie.MainActivity;
-import example.com.udacitymovie.MainFragment;
 import example.com.udacitymovie.R;
 import example.com.udacitymovie.model.MovieItem;
 
@@ -77,9 +55,7 @@ public class MovieAdapter extends ArrayAdapter<MovieItem> {
                 .load(url + movieItem.getPoster_path())
                 .crossFade()
                 .into(imageView);
-
         return convertView;
-
     }
 
 }

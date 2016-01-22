@@ -24,6 +24,5 @@ public class DetailActivity extends AppCompatActivity {
         fragmentTransaction.add(R.id.container_body, fragment);
         fragmentTransaction.commit();
 
-
     }
 }

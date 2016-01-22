@@ -1,11 +1,16 @@
 package example.com.udacitymovie;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -37,6 +42,9 @@ public class MainFragment extends Fragment {
     private MovieAdapter mMovieListAdapter;
     private GridView gridView;
     ArrayList<MovieItem> posterLinkUrl = new ArrayList<MovieItem>();
+    String sortBy, page;
+    public static int mImageWidth;
+    public static int mImageHeight;
 
     public MainFragment() {
         // Required empty public constructor
@@ -45,10 +53,13 @@ public class MainFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         Log.d(TAG, "on Create" + posterLinkUrl.size() + "");
 
         if (savedInstanceState == null || !savedInstanceState.containsKey("movieList")) {
-            new FetchMovieList().execute("");
+            sortBy = "popularity.desc";
+            page = "1";
+            new FetchMovieList().execute(sortBy, page);
         } else {
             posterLinkUrl = savedInstanceState.getParcelableArrayList("movieList");
         }
@@ -59,6 +70,11 @@ public class MainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView");
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        mImageWidth = displayMetrics.widthPixels / 2;
+        mImageHeight = mImageWidth * 4 / 3;
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         gridView = (GridView) rootView.findViewById(R.id.gv_movie);
@@ -79,12 +95,59 @@ public class MainFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.activiy_main, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        int id = item.getItemId();
+
+
+        switch (id) {
+            case R.id.most_popular:
+
+                sortBy = "popularity.desc";
+                page = "1";
+                new FetchMovieList().execute(sortBy, page);
+
+                break;
+
+            case R.id.highest_rated:
+
+                sortBy = "vote_average.desc";
+                page = "1";
+                posterLinkUrl.clear();
+
+                new FetchMovieList().execute(sortBy, page);
+
+                break;
+
+            case R.id.favourate:
+
+                break;
+
+            default:
+
+                break;
+
+        }
+
+
+        return super.onOptionsItemSelected(item);
+
+
+    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putParcelableArrayList("movieList", posterLinkUrl);
         super.onSaveInstanceState(outState);
     }
+
 
     private class FetchMovieList extends AsyncTask<String, String, String> {
 
@@ -102,10 +165,20 @@ public class MainFragment extends Fragment {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
             String jsonString = null;
+
+            String sortBy = params[0];
+            String page = params[1];
+//            String releaseYear = params[2];
+            Uri buildUri = Uri.parse(UrlString.movieBaseURL)
+                    .buildUpon()
+                    .appendQueryParameter(UrlString.param_sortBy, sortBy)
+                    .appendQueryParameter(UrlString.param_page, page)
+                    .appendQueryParameter(UrlString.param_apiKey, MainFragment.API_KEY_VALUE).build();
+
             try {
-                String baseUrl = "http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&page=1";
-                String apiKey = "&api_key=" + MainFragment.API_KEY_VALUE;
-                URL url = new URL(baseUrl.concat(apiKey));
+//                String baseUrl = "http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&page=1";
+//                String apiKey = "&api_key=" + MainFragment.API_KEY_VALUE;
+                URL url = new URL(buildUri.toString());
 
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");

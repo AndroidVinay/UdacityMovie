@@ -8,55 +8,51 @@ import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static int mImageWidth;
-    public static int mImageHeight;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        mImageWidth = displayMetrics.widthPixels / 2;
-        mImageHeight = mImageWidth * 4 / 3;
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        getMenuInflater().inflate(R.menu.activiy_main,menu);
-        return true;
-    }
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        int id = item.getItemId();
-
-        switch (id){
-
-            case R.id.most_popular:
-
-                break;
-
-            case R.id.highest_popular:
-
-                break;
-
-            case R.id.favourate:
-
-                break;
-
-            default:
-
-                break;
-
-        }
-
-
-        return super.onOptionsItemSelected(item);
-
 
     }
+
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//
+//        getMenuInflater().inflate(R.menu.activiy_main,menu);
+//        return true;
+//    }
+//
+//
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//
+//        int id = item.getItemId();
+//
+//        switch (id){
+//
+//            case R.id.most_popular:
+//
+//                break;
+//
+//            case R.id.highest_popular:
+//
+//                break;
+//
+//            case R.id.favourate:
+//
+//                break;
+//
+//            default:
+//
+//                break;
+//
+//        }
+//
+//
+//        return super.onOptionsItemSelected(item);
+//
+//
+//    }
 }
