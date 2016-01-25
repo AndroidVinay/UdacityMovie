@@ -53,6 +53,8 @@ public class MovieAdapter extends ArrayAdapter<MovieItem> {
 
         Glide.with(mContext)
                 .load(url + movieItem.getPoster_path())
+                .centerCrop()
+                .fitCenter()
                 .crossFade()
                 .into(imageView);
         return convertView;

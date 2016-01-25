@@ -106,6 +106,77 @@ public class MovieItem implements Parcelable {
         this.vote_count = vote_count;
     }
 
+    public String getPage() {
+        return page;
+    }
+
+    public void setPage(String page) {
+        this.page = page;
+    }
+
+    public String getTotal_results() {
+        return total_results;
+    }
+
+    public void setTotal_results(String total_results) {
+        this.total_results = total_results;
+    }
+
+    public String getTotal_pages() {
+        return total_pages;
+    }
+
+    public void setTotal_pages(String total_pages) {
+        this.total_pages = total_pages;
+    }
+
+    public String getAdult() {
+        return adult;
+    }
+
+    public void setAdult(String adult) {
+        this.adult = adult;
+    }
+
+    public String getGenre_ids() {
+        return genre_ids;
+    }
+
+    public void setGenre_ids(String genre_ids) {
+        this.genre_ids = genre_ids;
+    }
+
+    public String getOriginal_language() {
+        return original_language;
+    }
+
+    public void setOriginal_language(String original_language) {
+        this.original_language = original_language;
+    }
+
+    public String getBackdrop_path() {
+        return backdrop_path;
+    }
+
+    public void setBackdrop_path(String backdrop_path) {
+        this.backdrop_path = backdrop_path;
+    }
+
+    public String getPopularity() {
+        return popularity;
+    }
+
+    public void setPopularity(String popularity) {
+        this.popularity = popularity;
+    }
+
+    public String getVideo() {
+        return video;
+    }
+
+    public void setVideo(String video) {
+        this.video = video;
+    }
 
     public String getVote_average() {
         return vote_average;
