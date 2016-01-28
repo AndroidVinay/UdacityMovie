@@ -42,6 +42,7 @@ import example.com.udacitymovie.model.MovieItem;
 /**
  * A simple {@link Fragment} subclass.
  */
+
 public class MainFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private String TAG = MainFragment.class.getSimpleName();
@@ -52,7 +53,6 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     String sortBy, page;
     public static int mImageWidth;
     public static int mImageHeight;
-    private static final int CURSOR_LOADER_ID = 0;
 
     public MainFragment() {
         // Required empty public constructor
@@ -106,6 +106,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             }
         });
 
+
         return rootView;
     }
 
@@ -141,6 +142,8 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
                 break;
 
             case R.id.favourate:
+
+
 
                 break;
 
@@ -183,31 +186,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
 
-    public void insertData() {
-        ContentValues[] flavorValuesArr = new ContentValues[posterLinkUrl.size()];
-        // Loop through static array of Flavors, add each to an instance of ContentValues
-        // in the array of ContentValues
-        for (int i = 0; i < posterLinkUrl.size(); i++) {
-            flavorValuesArr[i] = new ContentValues();
-            flavorValuesArr[i].put(MovieContract.Favourite.COLUMN_SERVER_ID, posterLinkUrl.get(i).getId());
-            flavorValuesArr[i].put(MovieContract.Favourite.COLUMN_POSTER_PATH,
-                    posterLinkUrl.get(i).getPoster_path());
-            flavorValuesArr[i].put(MovieContract.Favourite.COLUMN_OVERVIEW, posterLinkUrl.get(i).getOverview());
-            flavorValuesArr[i].put(MovieContract.Favourite.COLUMN_RELEASE_DATE, posterLinkUrl.get(i).getRelease_date());
-            flavorValuesArr[i].put(MovieContract.Favourite.COLUMN_ORIGINAL_TITLE, posterLinkUrl.get(i).getOriginal_title());
-            flavorValuesArr[i].put(MovieContract.Favourite.COLUMN_ORIGINAL_LANGUAGE, posterLinkUrl.get(i).getOriginal_language());
-            flavorValuesArr[i].put(MovieContract.Favourite.COLUMN_TITLE, posterLinkUrl.get(i).getTitle());
-            flavorValuesArr[i].put(MovieContract.Favourite.COLUMN_BACKDROP_PATH, posterLinkUrl.get(i).getBackdrop_path());
-            flavorValuesArr[i].put(MovieContract.Favourite.COLUMN_POPULARITY, posterLinkUrl.get(i).getPopularity());
-            flavorValuesArr[i].put(MovieContract.Favourite.COLUMN_VOTE_COUNT, posterLinkUrl.get(i).getVote_count());
-            flavorValuesArr[i].put(MovieContract.Favourite.COLUMN_VIDEO, posterLinkUrl.get(i).getVideo());
-            flavorValuesArr[i].put(MovieContract.Favourite.COLUMN_VOTE_AVERAGE, posterLinkUrl.get(i).getVote_average());
-        }
 
-        // bulkInsert our ContentValues array
-        getActivity().getContentResolver().bulkInsert(MovieContract.Favourite.CONTENT_URI,
-                flavorValuesArr);
-    }
 
     private class FetchMovieList extends AsyncTask<String, String, String> {
 
@@ -306,17 +285,6 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
                 mMovieListAdapter.notifyDataSetChanged();
                 Log.d(TAG, "on PostExecute" + posterLinkUrl.size() + "");
 
-                Cursor c =
-                        getActivity().getContentResolver().query(MovieContract.Favourite.CONTENT_URI,
-                                new String[]{MovieContract.Favourite._ID},
-                                null,
-                                null,
-                                null);
-                if (c.getCount() == 0) {
-                    insertData();
-                }
-                // initialize loader
-                getLoaderManager().initLoader(CURSOR_LOADER_ID, null, MainFragment.this);
             } else {
                 Toast.makeText(getContext(), "posterLinkUrl is empty", Toast.LENGTH_SHORT).show();
             }

@@ -50,12 +50,10 @@ public class MovieAdapter extends ArrayAdapter<MovieItem> {
 //
         imageView = (ImageView) convertView.findViewById(R.id.iv_movie);
 
-
         Glide.with(mContext)
-                .load(url + movieItem.getPoster_path())
+                .load(url + movieItem.getPoster_path()).asBitmap()
                 .centerCrop()
                 .fitCenter()
-                .crossFade()
                 .into(imageView);
         return convertView;
     }
