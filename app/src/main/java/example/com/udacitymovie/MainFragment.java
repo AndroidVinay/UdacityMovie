@@ -142,8 +142,37 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
                 break;
 
             case R.id.favourate:
+                posterLinkUrl.clear();
+                Cursor c = getActivity().getContentResolver().query(MovieContract.Favourite.CONTENT_URI,
+                        null,
+                        null,
+                        null,
+                        null);
+                if (c.getCount() == 0) {
 
+                    for (int i = 0; i < c.getCount(); i++) {
+                        c.moveToFirst();
+                        String id1 = c.getString(c.getColumnIndex(MovieContract.Favourite.COLUMN_SERVER_ID));
+                        String poster_path = c.getString(c.getColumnIndex(MovieContract.Favourite.COLUMN_POSTER_PATH));
+                        String title = c.getString(c.getColumnIndex(MovieContract.Favourite.COLUMN_TITLE));
+                        String original_title = c.getString(c.getColumnIndex(MovieContract.Favourite.COLUMN_ORIGINAL_TITLE));
+                        String overview = c.getString(c.getColumnIndex(MovieContract.Favourite.COLUMN_OVERVIEW));
+                        String vote_average = c.getString(c.getColumnIndex(MovieContract.Favourite.COLUMN_VOTE_AVERAGE));
+                        String release_date = c.getString(c.getColumnIndex(MovieContract.Favourite.COLUMN_RELEASE_DATE));
+                        MovieItem mv = new MovieItem(id1, poster_path, title, original_title, overview, vote_average, release_date);
+                        posterLinkUrl.add(mv);
+                    }
 
+                    if (posterLinkUrl.size() > 0) {
+                        mMovieListAdapter.addAll(posterLinkUrl);
+                        mMovieListAdapter.notifyDataSetChanged();
+                        Log.d(TAG, "on PostExecute" + posterLinkUrl.size() + "");
+
+                    } else {
+                        Toast.makeText(getContext(), "posterLinkUrl is empty", Toast.LENGTH_SHORT).show();
+                    }
+
+                }
 
                 break;
 
@@ -184,8 +213,6 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onLoaderReset(Loader<Cursor> loader) {
         loader.reset();
     }
-
-
 
 
     private class FetchMovieList extends AsyncTask<String, String, String> {
@@ -255,7 +282,6 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
                     }
                 }
             }
-
 
 
             try {
