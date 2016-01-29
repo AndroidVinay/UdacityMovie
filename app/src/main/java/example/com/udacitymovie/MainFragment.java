@@ -257,6 +257,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             }
 
 
+
             try {
                 JSONObject jsonObject = new JSONObject(jsonString);
                 JSONArray jsonArray = jsonObject.getJSONArray("results");

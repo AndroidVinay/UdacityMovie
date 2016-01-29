@@ -103,12 +103,14 @@
                     android:textStyle="bold" />
 
 
-                <Button
+                <ToggleButton
                     android:id="@+id/btn_make_fav"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@color/colorButton"
                     android:text="mark as\nfavorite"
+                    android:textOn="Dislike"
+                    android:textOff="Like"
                     android:textColor="@color/colorText" />
             </LinearLayout>
 

@@ -83,12 +83,25 @@ public class MovieProvider extends ContentProvider {
                         sortOrder);
                 return retCursor;
             }
+            case FAVOURITE_BY_SERVER_ID: {
+
+                retCursor = DBhelper.getReadableDatabase().query(
+                        MovieContract.Favourite.TABLE_FAVOURITE,
+                        projection,
+                        MovieContract.Favourite.COLUMN_SERVER_ID+ " = ?",
+                        new String[]{String.valueOf(ContentUris.parseId(uri))},
+                        null,
+                        null,
+                        sortOrder);
+                return retCursor;
+            }
+
             case FAVOURITE_BY_ID: {
 
                 retCursor = DBhelper.getReadableDatabase().query(
                         MovieContract.Favourite.TABLE_FAVOURITE,
                         projection,
-                        MovieContract.Favourite._ID + " = ?",
+                        MovieContract.Favourite.COLUMN_SERVER_ID + " = ?",
                         new String[]{String.valueOf(ContentUris.parseId(uri))},
                         null,
                         null,
@@ -149,6 +162,14 @@ public class MovieProvider extends ContentProvider {
                         MovieContract.Favourite._ID + " = ?",
                         new String[]{String.valueOf(ContentUris.parseId(uri))});
                 // reset _ID
+                db.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '" +
+                        MovieContract.Favourite.TABLE_FAVOURITE + "'");
+
+                break;
+
+            case FAVOURITE_BY_SERVER_ID:
+                numDeleted = db.delete(MovieContract.Favourite.TABLE_FAVOURITE, MovieContract.Favourite.COLUMN_SERVER_ID + " = ?", new String[]{String.valueOf(ContentUris.parseId(uri))});
+                //reset SERVER_ID
                 db.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '" +
                         MovieContract.Favourite.TABLE_FAVOURITE + "'");
 

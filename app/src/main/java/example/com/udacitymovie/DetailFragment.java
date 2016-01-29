@@ -6,17 +6,22 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.bumptech.glide.Glide;
 
@@ -34,6 +39,7 @@ import example.com.udacitymovie.model.MovieItem;
  */
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    private static final String TAG = DetailFragment.class.getSimpleName();
     private static final int CURSOR_LOADER_ID = 0;
     MovieItem movieItem;
 
@@ -62,7 +68,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         TextView tv_overview = (TextView) rootView.findViewById(R.id.tv_overview);
         TextView tv_vote_average = (TextView) rootView.findViewById(R.id.tv_vote_average);
         TextView tv_release_date = (TextView) rootView.findViewById(R.id.tv_release_date);
-        Button btn_make_fav = (Button) rootView.findViewById(R.id.btn_make_fav);
+        ToggleButton btn_make_fav = (ToggleButton) rootView.findViewById(R.id.btn_make_fav);
         final ImageView iv_poster_image = (ImageView) rootView.findViewById(R.id.iv_poster_image);
         ListView lv_trailer = (ListView) rootView.findViewById(R.id.lv_trailor);
 
@@ -75,48 +81,89 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         Glide.with(getContext())
                 .load(url + movieItem.getPoster_path()).asBitmap()
                 .into(iv_poster_image);
-        btn_make_fav.setOnClickListener(new View.OnClickListener() {
+
+        Uri uri = MovieContract.Favourite.BuildFavouriteUri(Long.parseLong(movieItem.getId()));
+
+        Cursor c = getActivity().getContentResolver().query(uri,
+                new String[]{MovieContract.Favourite.COLUMN_SERVER_ID},
+                null,
+                null,
+                null);
+        if (c.getCount() == 0) {
+
+            btn_make_fav.setChecked(false);
+
+            Log.d(TAG, "it not liked yet");
+
+        } else {
+            btn_make_fav.setChecked(true);
+
+            Log.d(TAG, "it is already liked");
+
+        }
+
+        btn_make_fav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    Toast.makeText(getActivity(), "like", Toast.LENGTH_SHORT).show();
 
-                try {
-                    FileOutputStream fileOutputStream = getContext().openFileOutput(movieItem.getId() + ".jpg", getContext().MODE_PRIVATE);
-                    Bitmap bitmap = covertToBitmap(iv_poster_image.getDrawable(),iv_poster_image.getDrawable().getIntrinsicWidth(),iv_poster_image.getDrawable().getIntrinsicHeight());
-                    bitmap.compress(Bitmap.CompressFormat.JPEG,100,fileOutputStream);
-                    File file  =getContext().getFileStreamPath(movieItem.getId()+".jpg");
-                    String localPath = file.getAbsolutePath();
+                    try {
 
-                    movieItem.setPoster_path(localPath);
+                        FileOutputStream fileOutputStream = getContext().openFileOutput(movieItem.getId() + ".jpg", getContext().MODE_PRIVATE);
+                        Bitmap bitmap = covertToBitmap(iv_poster_image.getDrawable(), iv_poster_image.getDrawable().getIntrinsicWidth(), iv_poster_image.getDrawable().getIntrinsicHeight());
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
+                        File file = getContext().getFileStreamPath(movieItem.getId() + ".jpg");
+                        String localPath = file.getAbsolutePath();
 
-                    fileOutputStream.flush();
-                    fileOutputStream.close();
+                        movieItem.setPoster_path(localPath);
 
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                        fileOutputStream.flush();
+                        fileOutputStream.close();
+
+                        //insert data in table
+                        Cursor c = getActivity().getContentResolver().query(MovieContract.Favourite.CONTENT_URI,
+                                new String[]{MovieContract.Favourite.COLUMN_SERVER_ID},
+                                null,
+                                null,
+                                null);
+                        if (c.getCount() == 0) {
+                            insertData();
+                        }
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    // initialize loader
+                    getLoaderManager().initLoader(CURSOR_LOADER_ID, null, DetailFragment.this);
+
+                } else {
+                    Toast.makeText(getActivity(), "dislike", Toast.LENGTH_SHORT).show();
+
+                    Cursor c = getActivity().getContentResolver().query(MovieContract.Favourite.CONTENT_URI,
+                            new String[]{MovieContract.Favourite.COLUMN_SERVER_ID},
+                            null,
+                            null,
+                            null);
+                    if (c.getCount() > 0) {
+//                        insertData();
+
+                        int deleteRow = 0;
+                        Uri uri = MovieContract.Favourite.BuildFavouriteUri(Long.valueOf(movieItem.getId()));
+                        deleteRow = getActivity().getContentResolver().delete(MovieContract.Favourite.CONTENT_URI, MovieContract.Favourite.COLUMN_SERVER_ID + " = ?", new String[]{movieItem.getId()});
+
+                        Log.d(TAG, "Number of row data deleted" + deleteRow);
+                    }
                 }
-
-//
-//                Cursor c =
-//                        getActivity().getContentResolver().query(MovieContract.Favourite.CONTENT_URI,
-//                                new String[]{MovieContract.Favourite.COLUMN_SERVER_ID},
-//                                null,
-//                                null,
-//                                null);
-//                if (c.getCount() == 0) {
-//
-
-
-                insertData();
-//                }
-                // initialize loader
-                getLoaderManager().initLoader(CURSOR_LOADER_ID, null, DetailFragment.this);
             }
         });
 
+
         return rootView;
     }
+
 
     public void insertData() {
 

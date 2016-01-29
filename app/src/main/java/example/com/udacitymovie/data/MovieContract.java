@@ -32,7 +32,6 @@ public class MovieContract {
         public static final String COLUMN_VIDEO = "video";
         public static final String COLUMN_VOTE_AVERAGE = "vote_average";
 
-
         public static final String SQL_CREATE = T.CREATE_TABLE + TABLE_FAVOURITE + T.OPEN_BRACE
                 + _ID + T.TYPE_INTEGER + T.PRIMARY_KEY + T.AUTO_INCREMENT + T.SEP_COMMA
                 + COLUMN_SERVER_ID + T.TYPE_INTEGER + T.SEP_COMMA
@@ -52,7 +51,6 @@ public class MovieContract {
 
         public static final String SQL_DROP = T.DROP_TABLE + TABLE_FAVOURITE;
 
-
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(Favourite.TABLE_FAVOURITE).build();
 
         public static final String CONTENT_DIR_TYPE = Uri.parse(ContentResolver.CURSOR_DIR_BASE_TYPE).buildUpon().appendPath(CONTENT_AUTHORITY)
@@ -64,7 +62,6 @@ public class MovieContract {
         public static Uri BuildFavouriteUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
-
 
     }
 
