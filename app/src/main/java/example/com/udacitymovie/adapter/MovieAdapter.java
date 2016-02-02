@@ -22,7 +22,6 @@ public class MovieAdapter extends ArrayAdapter<MovieItem> {
 
     private Context mContext;
     private ArrayList<MovieItem> posterLinkUrl = new ArrayList<>();
-
     LayoutInflater inflater;
 
     public MovieAdapter(Context context, int resource, ArrayList<MovieItem> objects) {

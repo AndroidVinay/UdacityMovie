@@ -1,11 +1,14 @@
 package example.com.udacitymovie;
 
+import android.database.Cursor;
+import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import example.com.udacitymovie.data.MovieContract;
 import example.com.udacitymovie.model.MovieItem;
 
 public class DetailActivity extends AppCompatActivity {
@@ -15,9 +18,8 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-        MovieItem movieItem = getIntent().getExtras().getParcelable("movieDetails");
-
+        String movieItem = getIntent().getExtras().getString("movieServerId");
+//        int deleteRow = 0;
         Fragment fragment = DetailFragment.newInstance(movieItem);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

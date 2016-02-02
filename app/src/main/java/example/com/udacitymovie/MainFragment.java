@@ -11,6 +11,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,11 +33,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Vector;
 
 import example.com.udacitymovie.adapter.MovieAdapter;
+import example.com.udacitymovie.adapter.RecycleVieMovieAdapter;
 import example.com.udacitymovie.data.MovieContract;
 import example.com.udacitymovie.model.MovieItem;
 
@@ -47,12 +52,15 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private String TAG = MainFragment.class.getSimpleName();
     public static final String API_KEY_VALUE = "e1dc62d7886d8f0e3741112dbef87484";
-    private MovieAdapter mMovieListAdapter;
-    private GridView gridView;
+    //    private MovieAdapter mMovieListAdapter;
+    RecycleVieMovieAdapter recycleVieMovieAdapter;
+    //    private GridView gridView;
+    private RecyclerView recyclerView;
     ArrayList<MovieItem> posterLinkUrl = new ArrayList<MovieItem>();
     String sortBy, page;
     public static int mImageWidth;
     public static int mImageHeight;
+    private static final int MOVIE_LOADER_ID = 0;
 
     public MainFragment() {
         // Required empty public constructor
@@ -76,8 +84,8 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-
         super.onActivityCreated(savedInstanceState);
+        getLoaderManager().initLoader(MOVIE_LOADER_ID, null, this);
     }
 
     @Override
@@ -91,21 +99,19 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
         mImageHeight = mImageWidth * 4 / 3;
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        gridView = (GridView) rootView.findViewById(R.id.gv_movie);
-        mMovieListAdapter = new MovieAdapter(getActivity(), R.layout.movie_grid_item, posterLinkUrl);
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.rv_movie);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(),2);
+        recyclerView.setLayoutManager(gridLayoutManager);
+        Cursor cur = getActivity().getContentResolver().query(
+                MovieContract.Favourite.CONTENT_URI,
+                null,
+                null,
+                null,
+                null);
+        recycleVieMovieAdapter = new RecycleVieMovieAdapter(getActivity(), cur, 0);
         Log.d(TAG, "on Resume" + posterLinkUrl.size() + "");
-        gridView.setAdapter(mMovieListAdapter);
-        mMovieListAdapter.notifyDataSetChanged();
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getContext(), DetailActivity.class);
-                MovieItem movieItem = posterLinkUrl.get(position);
-                intent.putExtra("movieDetails", movieItem);
-                startActivity(intent);
-            }
-        });
-
+        recyclerView.setAdapter(recycleVieMovieAdapter);
+        recycleVieMovieAdapter.notifyDataSetChanged();
 
         return rootView;
     }
@@ -120,7 +126,6 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     public boolean onOptionsItemSelected(MenuItem item) {
 
         int id = item.getItemId();
-
 
         switch (id) {
             case R.id.most_popular:
@@ -164,10 +169,9 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
                     }
 
                     if (posterLinkUrl.size() > 0) {
-                        mMovieListAdapter.addAll(posterLinkUrl);
-                        mMovieListAdapter.notifyDataSetChanged();
-                        Log.d(TAG, "on PostExecute" + posterLinkUrl.size() + "");
-
+//                        recycleVieMovieAdapter.addAll(posterLinkUrl);
+//                        mMovieListAdapter.notifyDataSetChanged();
+//                        Log.d(TAG, "on PostExecute" + posterLinkUrl.size() + "");
                     } else {
                         Toast.makeText(getContext(), "posterLinkUrl is empty", Toast.LENGTH_SHORT).show();
                     }
@@ -206,11 +210,13 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        data.close();
+
+        recycleVieMovieAdapter.swapCursor(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+
         loader.reset();
     }
 
@@ -283,10 +289,12 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
                 }
             }
 
-
+            ArrayList<ContentValues> cv;
             try {
                 JSONObject jsonObject = new JSONObject(jsonString);
                 JSONArray jsonArray = jsonObject.getJSONArray("results");
+                cv = new ArrayList(jsonArray.length());
+
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jobj = jsonArray.getJSONObject(i);
                     MovieItem movieItem = new MovieItem(jobj.getString("id"),
@@ -297,24 +305,32 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
                             jobj.getString("vote_average"),
                             jobj.getString("release_date"));
                     posterLinkUrl.add(movieItem);
+
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(MovieContract.Favourite.COLUMN_SERVER_ID, jobj.getString("id"));
+                    contentValues.put(MovieContract.Favourite.COLUMN_POSTER_PATH, jobj.getString("poster_path"));
+                    contentValues.put(MovieContract.Favourite.COLUMN_TITLE, jobj.getString("title"));
+                    contentValues.put(MovieContract.Favourite.COLUMN_ORIGINAL_TITLE, jobj.getString("original_title"));
+                    contentValues.put(MovieContract.Favourite.COLUMN_OVERVIEW, jobj.getString("overview"));
+                    contentValues.put(MovieContract.Favourite.COLUMN_VOTE_AVERAGE, jobj.getString("vote_average"));
+                    contentValues.put(MovieContract.Favourite.COLUMN_RELEASE_DATE, jobj.getString("release_date"));
+                    cv.add(contentValues);
+
                 }
+                int inserted = 0;
+
+                ContentValues[] cvArray = new ContentValues[cv.size()];
+                cv.toArray(cvArray);
+                inserted = getActivity().getContentResolver().bulkInsert(MovieContract.Favourite.CONTENT_URI,
+                        cvArray);
+
                 Log.d(TAG, "on Background" + posterLinkUrl.size() + "");
+                Log.d(TAG, "on Background" + " data inserted   " + inserted);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
             return jsonString;
         }
 
-        @Override
-        protected void onPostExecute(String s) {
-            if (posterLinkUrl.size() > 0) {
-                mMovieListAdapter.addAll(posterLinkUrl);
-                mMovieListAdapter.notifyDataSetChanged();
-                Log.d(TAG, "on PostExecute" + posterLinkUrl.size() + "");
-
-            } else {
-                Toast.makeText(getContext(), "posterLinkUrl is empty", Toast.LENGTH_SHORT).show();
-            }
-        }
     }
 }

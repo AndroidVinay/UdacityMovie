@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -41,18 +42,20 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     private static final String TAG = DetailFragment.class.getSimpleName();
     private static final int CURSOR_LOADER_ID = 0;
-    MovieItem movieItem;
+    String movieServerId;
+    String localPath;
+    Cursor cur;
 
     public DetailFragment() {
         // Required empty public constructor
     }
 
 
-    public static DetailFragment newInstance(MovieItem movieItem) {
+    public static DetailFragment newInstance(String cursorItem) {
         DetailFragment fragment = new DetailFragment();
 
         Bundle bundle = new Bundle();
-        bundle.putParcelable("movieDetail", movieItem);
+        bundle.putString("movieServerId", cursorItem);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -72,17 +75,20 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         final ImageView iv_poster_image = (ImageView) rootView.findViewById(R.id.iv_poster_image);
         ListView lv_trailer = (ListView) rootView.findViewById(R.id.lv_trailor);
 
-        movieItem = (MovieItem) getArguments().get("movieDetail");
+        movieServerId = getArguments().getString("movieServerId");
 
-        tv_og_title.setText(movieItem.getOriginal_title().toString());
-        tv_overview.setText(movieItem.getOverview());
-        tv_vote_average.setText(movieItem.getVote_average().toString());
-        tv_release_date.setText(movieItem.getRelease_date().toString());
+        Uri uri = MovieContract.Favourite.BuildFavouriteUri(Long.valueOf(movieServerId));
+        cur = getActivity().getContentResolver().query(uri,
+                null, null, null, null);
+        cur.moveToFirst();
+        tv_og_title.setText(cur.getString(cur.getColumnIndex(MovieContract.Favourite.COLUMN_ORIGINAL_TITLE)));
+        tv_overview.setText(cur.getString(cur.getColumnIndex(MovieContract.Favourite.COLUMN_OVERVIEW)));
+        tv_vote_average.setText(cur.getString(cur.getColumnIndex(MovieContract.Favourite.COLUMN_VOTE_AVERAGE)));
+        tv_release_date.setText(cur.getString(cur.getColumnIndex(MovieContract.Favourite.COLUMN_RELEASE_DATE)));
         Glide.with(getContext())
-                .load(url + movieItem.getPoster_path()).asBitmap()
+                .load(url + cur.getString(cur.getColumnIndex(MovieContract.Favourite.COLUMN_POSTER_PATH))).asBitmap()
                 .into(iv_poster_image);
 
-        Uri uri = MovieContract.Favourite.BuildFavouriteUri(Long.parseLong(movieItem.getId()));
 
         Cursor c = getActivity().getContentResolver().query(uri,
                 new String[]{MovieContract.Favourite.COLUMN_SERVER_ID},
@@ -110,13 +116,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                     try {
 
-                        FileOutputStream fileOutputStream = getContext().openFileOutput(movieItem.getId() + ".jpg", getContext().MODE_PRIVATE);
+                        FileOutputStream fileOutputStream = getContext().openFileOutput(movieServerId + ".jpg", getContext().MODE_PRIVATE);
                         Bitmap bitmap = covertToBitmap(iv_poster_image.getDrawable(), iv_poster_image.getDrawable().getIntrinsicWidth(), iv_poster_image.getDrawable().getIntrinsicHeight());
                         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
-                        File file = getContext().getFileStreamPath(movieItem.getId() + ".jpg");
-                        String localPath = file.getAbsolutePath();
+                        File file = getContext().getFileStreamPath(movieServerId + ".jpg");
+                        localPath = file.getAbsolutePath();
 
-                        movieItem.setPoster_path(localPath);
+//                        movieItem.setPoster_path(localPath);
 
                         fileOutputStream.flush();
                         fileOutputStream.close();
@@ -128,7 +134,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                                 null,
                                 null);
                         if (c.getCount() == 0) {
-                            insertData();
+                            updatedData();
                         }
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
@@ -148,11 +154,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                             null,
                             null);
                     if (c.getCount() > 0) {
-//                        insertData();
 
                         int deleteRow = 0;
-                        Uri uri = MovieContract.Favourite.BuildFavouriteUri(Long.valueOf(movieItem.getId()));
-                        deleteRow = getActivity().getContentResolver().delete(MovieContract.Favourite.CONTENT_URI, MovieContract.Favourite.COLUMN_SERVER_ID + " = ?", new String[]{movieItem.getId()});
+                        Uri uri = MovieContract.Favourite.BuildFavouriteUri(Long.valueOf(movieServerId));
+                        deleteRow = getActivity().getContentResolver().delete(MovieContract.Favourite.CONTENT_URI,
+                                MovieContract.Favourite.COLUMN_SERVER_ID + " = ?",
+                                new String[]{movieServerId});
 
                         Log.d(TAG, "Number of row data deleted" + deleteRow);
                     }
@@ -164,26 +171,36 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         return rootView;
     }
 
-
-    public void insertData() {
+    public void updatedData() {
 
         ContentValues values = new ContentValues();
-        values.put(MovieContract.Favourite.COLUMN_SERVER_ID, movieItem.getId());
-        values.put(MovieContract.Favourite.COLUMN_POSTER_PATH, movieItem.getPoster_path());
-        values.put(MovieContract.Favourite.COLUMN_OVERVIEW, movieItem.getOverview());
-        values.put(MovieContract.Favourite.COLUMN_RELEASE_DATE, movieItem.getRelease_date());
-        values.put(MovieContract.Favourite.COLUMN_ORIGINAL_TITLE, movieItem.getOriginal_title());
-        values.put(MovieContract.Favourite.COLUMN_ORIGINAL_LANGUAGE, movieItem.getOriginal_language());
-        values.put(MovieContract.Favourite.COLUMN_TITLE, movieItem.getTitle());
-        values.put(MovieContract.Favourite.COLUMN_BACKDROP_PATH, movieItem.getBackdrop_path());
-        values.put(MovieContract.Favourite.COLUMN_POPULARITY, movieItem.getPopularity());
-        values.put(MovieContract.Favourite.COLUMN_VOTE_COUNT, movieItem.getVote_count());
-        values.put(MovieContract.Favourite.COLUMN_VIDEO, movieItem.getVideo());
-        values.put(MovieContract.Favourite.COLUMN_VOTE_AVERAGE, movieItem.getVote_average());
+        values.put(MovieContract.Favourite.COLUMN_POSTER_PATH, localPath);
+        int updateResult = 0;
+        updateResult = getActivity().getContentResolver().update(MovieContract.Favourite.CONTENT_URI,
+                values, MovieContract.Favourite.COLUMN_SERVER_ID + " = ?", new String[]{movieServerId});
+        Log.d(TAG, "favourite data is updated : " + updateResult);
 
-        getActivity().getContentResolver().insert(MovieContract.Favourite.CONTENT_URI,
-                values);
     }
+
+//    public void insertData() {
+//
+//        ContentValues values = new ContentValues();
+//        values.put(MovieContract.Favourite.COLUMN_SERVER_ID, movieItem.getId());
+//        values.put(MovieContract.Favourite.COLUMN_POSTER_PATH, movieItem.getPoster_path());
+//        values.put(MovieContract.Favourite.COLUMN_OVERVIEW, movieItem.getOverview());
+//        values.put(MovieContract.Favourite.COLUMN_RELEASE_DATE, movieItem.getRelease_date());
+//        values.put(MovieContract.Favourite.COLUMN_ORIGINAL_TITLE, movieItem.getOriginal_title());
+//        values.put(MovieContract.Favourite.COLUMN_ORIGINAL_LANGUAGE, movieItem.getOriginal_language());
+//        values.put(MovieContract.Favourite.COLUMN_TITLE, movieItem.getTitle());
+//        values.put(MovieContract.Favourite.COLUMN_BACKDROP_PATH, movieItem.getBackdrop_path());
+//        values.put(MovieContract.Favourite.COLUMN_POPULARITY, movieItem.getPopularity());
+//        values.put(MovieContract.Favourite.COLUMN_VOTE_COUNT, movieItem.getVote_count());
+//        values.put(MovieContract.Favourite.COLUMN_VIDEO, movieItem.getVideo());
+//        values.put(MovieContract.Favourite.COLUMN_VOTE_AVERAGE, movieItem.getVote_average());
+//
+//        getActivity().getContentResolver().insert(MovieContract.Favourite.CONTENT_URI,
+//                values);
+//    }
 
     public Bitmap covertToBitmap(Drawable drawable, int width, int hight) {
 
