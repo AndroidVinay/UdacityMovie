@@ -3,6 +3,7 @@ package example.com.udacitymovie.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -40,13 +41,17 @@ public class RecycleVieMovieAdapter extends CursorRecyclerViewAdapter {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, final Cursor cursor) {
-        MovieHolder movieHolder = (MovieHolder) viewHolder;
-        String url = "http://image.tmdb.org/t/p/w154";
+    public void changeCursor(Cursor cursor) {
+        super.changeCursor(cursor);
+    }
 
-        Log.d(TAG, "" + cursor.getString(cursor.getColumnIndex(MovieContract.Favourite.COLUMN_POSTER_PATH)));
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
+        super.onBindViewHolder(viewHolder, position);
+        MovieHolder movieHolder = (MovieHolder) viewHolder;
+        cursor.moveToPosition(position);
         Glide.with(context)
-                .load(url + cursor.getString(cursor.getColumnIndex(MovieContract.Favourite.COLUMN_POSTER_PATH))).asBitmap()
+                .load(cursor.getString(cursor.getColumnIndex(MovieContract.Favourite.COLUMN_POSTER_PATH))).asBitmap()
                 .centerCrop()
                 .fitCenter()
                 .into(movieHolder.imageView);
@@ -55,14 +60,23 @@ public class RecycleVieMovieAdapter extends CursorRecyclerViewAdapter {
             @Override
             public void onClick(View v) {
 
-                Log.d(TAG, "" + cursor.getString(cursor.getColumnIndex(MovieContract.Favourite.COLUMN_SERVER_ID)));
-
+                Log.d(TAG, "on click of image" + cursor.getString(cursor.getColumnIndex(MovieContract.Favourite.COLUMN_SERVER_ID)));
+                Uri uri = MovieContract.Favourite.BuildFavouriteUri(Long.valueOf(cursor.getString(cursor.getColumnIndex(MovieContract.Favourite.COLUMN_SERVER_ID))));
                 Intent i = new Intent(context, DetailActivity.class);
-                i.putExtra("movieServerId", cursor.getString(cursor.getColumnIndex(MovieContract.Favourite.COLUMN_SERVER_ID)));
+                i.putExtra("selectedUri", uri);
                 context.startActivity(i);
 
             }
         });
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, final Cursor cursor) {
+
+//        String url = "http://image.tmdb.org/t/p/w154";
+
+//        Log.d(TAG, "" + cursor.getString(cursor.getColumnIndex(MovieContract.Favourite.COLUMN_POSTER_PATH)));
+
 
     }
 

@@ -18,9 +18,9 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        String movieItem = getIntent().getExtras().getString("movieServerId");
+        Uri uri = getIntent().getExtras().getParcelable("selectedUri");
 //        int deleteRow = 0;
-        Fragment fragment = DetailFragment.newInstance(movieItem);
+        Fragment fragment = DetailFragment.newInstance(uri);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.add(R.id.container_body, fragment);

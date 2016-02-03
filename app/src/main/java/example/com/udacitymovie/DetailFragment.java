@@ -50,15 +50,16 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         // Required empty public constructor
     }
 
-
-    public static DetailFragment newInstance(String cursorItem) {
+    public static DetailFragment newInstance(Uri uri) {
         DetailFragment fragment = new DetailFragment();
 
         Bundle bundle = new Bundle();
-        bundle.putString("movieServerId", cursorItem);
+        bundle.putParcelable("selectedUri", uri);
         fragment.setArguments(bundle);
         return fragment;
     }
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -75,20 +76,30 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         final ImageView iv_poster_image = (ImageView) rootView.findViewById(R.id.iv_poster_image);
         ListView lv_trailer = (ListView) rootView.findViewById(R.id.lv_trailor);
 
-        movieServerId = getArguments().getString("movieServerId");
+        Uri uri = getArguments().getParcelable("selectedUri");
 
-        Uri uri = MovieContract.Favourite.BuildFavouriteUri(Long.valueOf(movieServerId));
         cur = getActivity().getContentResolver().query(uri,
                 null, null, null, null);
-        cur.moveToFirst();
+        if (cur.getCount() > 0)
+            cur.moveToNext();
+
+        Log.d(TAG, "count of cur " + cur.getCount());
+        movieServerId = cur.getString(cur.getColumnIndex(MovieContract.Favourite.COLUMN_SERVER_ID));
+        Log.d(TAG, "count of Server id " + cur.getString(cur.getColumnIndex(MovieContract.Favourite.COLUMN_SERVER_ID)));
         tv_og_title.setText(cur.getString(cur.getColumnIndex(MovieContract.Favourite.COLUMN_ORIGINAL_TITLE)));
+        Log.d(TAG, "count of COLUMN_ORIGINAL_TITLE " + cur.getString(cur.getColumnIndex(MovieContract.Favourite.COLUMN_ORIGINAL_TITLE)));
         tv_overview.setText(cur.getString(cur.getColumnIndex(MovieContract.Favourite.COLUMN_OVERVIEW)));
+        Log.d(TAG, "count of COLUMN_OVERVIEW " + cur.getString(cur.getColumnIndex(MovieContract.Favourite.COLUMN_OVERVIEW)));
         tv_vote_average.setText(cur.getString(cur.getColumnIndex(MovieContract.Favourite.COLUMN_VOTE_AVERAGE)));
+        Log.d(TAG, "count of COLUMN_VOTE_AVERAGE " + cur.getString(cur.getColumnIndex(MovieContract.Favourite.COLUMN_VOTE_AVERAGE)));
         tv_release_date.setText(cur.getString(cur.getColumnIndex(MovieContract.Favourite.COLUMN_RELEASE_DATE)));
+        Log.d(TAG, "count of COLUMN_RELEASE_DATE " + cur.getString(cur.getColumnIndex(MovieContract.Favourite.COLUMN_RELEASE_DATE)));
+
+
         Glide.with(getContext())
                 .load(url + cur.getString(cur.getColumnIndex(MovieContract.Favourite.COLUMN_POSTER_PATH))).asBitmap()
                 .into(iv_poster_image);
-
+        Log.d(TAG, "count of COLUMN_POSTER_PATH " + cur.getString(cur.getColumnIndex(MovieContract.Favourite.COLUMN_POSTER_PATH)));
 
         Cursor c = getActivity().getContentResolver().query(uri,
                 new String[]{MovieContract.Favourite.COLUMN_SERVER_ID},

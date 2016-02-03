@@ -100,7 +100,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.rv_movie);
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(),2);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
         recyclerView.setLayoutManager(gridLayoutManager);
         Cursor cur = getActivity().getContentResolver().query(
                 MovieContract.Favourite.CONTENT_URI,
@@ -305,10 +305,10 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
                             jobj.getString("vote_average"),
                             jobj.getString("release_date"));
                     posterLinkUrl.add(movieItem);
-
+                    String url = "http://image.tmdb.org/t/p/w154";
                     ContentValues contentValues = new ContentValues();
                     contentValues.put(MovieContract.Favourite.COLUMN_SERVER_ID, jobj.getString("id"));
-                    contentValues.put(MovieContract.Favourite.COLUMN_POSTER_PATH, jobj.getString("poster_path"));
+                    contentValues.put(MovieContract.Favourite.COLUMN_POSTER_PATH, url + jobj.getString("poster_path"));
                     contentValues.put(MovieContract.Favourite.COLUMN_TITLE, jobj.getString("title"));
                     contentValues.put(MovieContract.Favourite.COLUMN_ORIGINAL_TITLE, jobj.getString("original_title"));
                     contentValues.put(MovieContract.Favourite.COLUMN_OVERVIEW, jobj.getString("overview"));
