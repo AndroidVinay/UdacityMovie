@@ -11,7 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
@@ -27,55 +27,61 @@ public class RecycleVieMovieAdapter extends CursorRecyclerViewAdapter {
     Context context;
     Cursor cursor;
 
-    public RecycleVieMovieAdapter(Context context, Cursor cursor, int flag) {
+    public RecycleVieMovieAdapter(Context context, Cursor cursor) {
         super(context, cursor);
         this.context = context;
         this.cursor = cursor;
     }
 
     @Override
+    public void changeCursor(Cursor cursor) {
+        super.changeCursor(this.cursor);
+    }
+
+    @Override
+    public Cursor swapCursor(Cursor newCursor) {
+        return super.swapCursor(this.cursor);
+    }
+
+    @Override
+    public int getItemCount() {
+        return super.getItemCount();
+    }
+
+    @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.movie_grid_item, parent, false);
         MovieHolder movieHolder = new MovieHolder(view);
         return movieHolder;
+
     }
 
     @Override
-    public void changeCursor(Cursor cursor) {
-        super.changeCursor(cursor);
+    public Cursor getCursor() {
+        return cursor;
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
-        super.onBindViewHolder(viewHolder, position);
-        MovieHolder movieHolder = (MovieHolder) viewHolder;
-        cursor.moveToPosition(position);
+    public void onBindViewHolder(MovieHolder viewHolder, Cursor cursor) {
+        Log.d(TAG, " on Bind View Holder" + cursor.getString(cursor.getColumnIndex(MovieContract.Favourite.COLUMN_POSTER_PATH)));
+
+        this.cursor = cursor;
+        viewHolder.serverId = getCursor().getString(getCursor().getColumnIndex(MovieContract.Favourite.COLUMN_SERVER_ID));
         Glide.with(context)
-                .load(cursor.getString(cursor.getColumnIndex(MovieContract.Favourite.COLUMN_POSTER_PATH))).asBitmap()
+                .load(getCursor().getString(getCursor().getColumnIndex(MovieContract.Favourite.COLUMN_POSTER_PATH))).asBitmap()
                 .centerCrop()
                 .fitCenter()
-                .into(movieHolder.imageView);
+                .into(viewHolder.imageView);
 
-        movieHolder.imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+//        }
 
-                Log.d(TAG, "on click of image" + cursor.getString(cursor.getColumnIndex(MovieContract.Favourite.COLUMN_SERVER_ID)));
-                Uri uri = MovieContract.Favourite.BuildFavouriteUri(Long.valueOf(cursor.getString(cursor.getColumnIndex(MovieContract.Favourite.COLUMN_SERVER_ID))));
-                Intent i = new Intent(context, DetailActivity.class);
-                i.putExtra("selectedUri", uri);
-                context.startActivity(i);
 
-            }
-        });
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, final Cursor cursor) {
-
-//        String url = "http://image.tmdb.org/t/p/w154";
-
-//        Log.d(TAG, "" + cursor.getString(cursor.getColumnIndex(MovieContract.Favourite.COLUMN_POSTER_PATH)));
+    public void onBindViewHolder(MovieHolder viewHolder, int position) {
+        super.onBindViewHolder(viewHolder, position);
 
 
     }
@@ -84,15 +90,26 @@ public class RecycleVieMovieAdapter extends CursorRecyclerViewAdapter {
     class MovieHolder extends RecyclerView.ViewHolder {
 
         ImageView imageView;
-//        TextView tvMovieName;
+        String serverId;
+
 
         public MovieHolder(View itemView) {
             super(itemView);
 
             imageView = (ImageView) itemView.findViewById(R.id.iv_movie);
-//            tvMovieName = (TextView) itemView.findViewById(R.id.tv_movie_name);
 
-            // What would be best way for Recycle Click Listener
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(context, "" + serverId, Toast.LENGTH_SHORT).show();
+                    Uri uri = MovieContract.Favourite.BuildFavouriteUri(Long.parseLong(serverId));
+                    Intent i = new Intent(context, DetailActivity.class);
+                    i.putExtra("selectedUri", uri);
+                    context.startActivity(i);
+
+
+                }
+            });
 
         }
     }

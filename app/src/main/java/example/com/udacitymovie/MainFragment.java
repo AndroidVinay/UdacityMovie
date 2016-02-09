@@ -108,10 +108,10 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
                 null,
                 null,
                 null);
-        recycleVieMovieAdapter = new RecycleVieMovieAdapter(getActivity(), cur, 0);
+
+        recycleVieMovieAdapter = new RecycleVieMovieAdapter(getActivity(), cur);
         Log.d(TAG, "on Resume" + posterLinkUrl.size() + "");
         recyclerView.setAdapter(recycleVieMovieAdapter);
-        recycleVieMovieAdapter.notifyDataSetChanged();
 
         return rootView;
     }
@@ -120,6 +120,12 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.activiy_main, menu);
         super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        recycleVieMovieAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -200,24 +206,32 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity(),
-                MovieContract.Favourite.CONTENT_URI,
-                null,
-                null,
-                null,
-                null);
+        switch (id) {
+
+            case MOVIE_LOADER_ID:
+                return new CursorLoader(getActivity(),
+                        MovieContract.Favourite.CONTENT_URI,
+                        null,
+                        null,
+                        null,
+                        null);
+
+            default:
+                return null;
+        }
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
 
-        recycleVieMovieAdapter.swapCursor(data);
+        recycleVieMovieAdapter.swapCursor(cursor);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 
-        loader.reset();
+        recycleVieMovieAdapter.swapCursor(null);
+
     }
 
 

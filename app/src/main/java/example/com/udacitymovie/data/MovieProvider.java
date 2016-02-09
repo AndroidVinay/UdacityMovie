@@ -112,6 +112,7 @@ public class MovieProvider extends ContentProvider {
                 // By default, we assume a bad URI
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
             }
+
         }
 
 //        return null;
